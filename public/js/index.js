@@ -1,4 +1,3 @@
-
 var socket = io();
 
 socket.on('connect', function() {
@@ -11,16 +10,17 @@ socket.on('disconnect', function() {
 });
 
 socket.on('newMessage', function(message) {
-    console.log('New message', message);
+    var formattedTime = moment(message.createdAt).format('h:mm a');
     var li = $('<li></li>');
-    li.text(`${message.from}: ${message.text}`);
+    li.text(`${message.from} ${formattedTime}: ${message.text}`);
     $('#messages').append(li);
 })
 
 socket.on('newLocationMessage', function(message) {
+    var formattedTime = moment(message.createdAt).format('h:mm a');
     var li = $('<li></li>');
     var anchor = $('<a target="_blank">My Current Location</a>');
-    li.text(`${message.from}:`);
+    li.text(`${message.from} ${formattedTime}: `);
     anchor.attr('href', message.url);
     li.append(anchor);
     $('#messages').append(li);
@@ -50,7 +50,7 @@ locationButton.on('click', function() {
     }
     locationButton.text('Sending location..');
     locationButton.prop('disabled', true);
-    
+
     navigator.geolocation.getCurrentPosition(function(position) {
         socket.emit('createLocationMessage', {
             latitude: position.coords.latitude,
