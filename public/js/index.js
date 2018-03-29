@@ -1,3 +1,4 @@
+
 var socket = io();
 
 socket.on('connect', function() {
@@ -28,25 +29,36 @@ socket.on('newLocationMessage', function(message) {
 $('#message-form').on('submit', function(e) {
     e.preventDefault();
 
+    var messageTextbox = $('[name=message');
+
     socket.emit('createMessage', {
         from: 'User',
-        text: $('[name=message]').val()
+        text: messageTextbox.val()
     }, function() {
-
+        messageTextbox.val('');
     });
 });
-
+function revertButton() {
+    var locationButton = $('#send-location');
+    locationButton.prop('disabled', false);
+    locationButton.text('Send location');
+}
 var locationButton = $('#send-location');
 locationButton.on('click', function() {
     if (!navigator.geolocation) {
-        return alert('Navigator not available')
+        return alert('Navigator not available');
     }
+    locationButton.text('Sending location..');
+    locationButton.prop('disabled', true);
+    
     navigator.geolocation.getCurrentPosition(function(position) {
         socket.emit('createLocationMessage', {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
         });
+        revertButton();
     }, function() {
-        alert('Unable to fetch location.')
+        alert('Unable to fetch location.');
+        revertButton();
     }, {timeout: 4000})
 })
